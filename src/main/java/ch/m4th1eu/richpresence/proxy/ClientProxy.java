@@ -5,6 +5,9 @@ import net.minecraftforge.common.MinecraftForge;
 
 import java.io.File;
 
+/**
+ * @author M4TH1EU_#0001
+ */
 public class ClientProxy extends CommonProxy {
 
     @Override

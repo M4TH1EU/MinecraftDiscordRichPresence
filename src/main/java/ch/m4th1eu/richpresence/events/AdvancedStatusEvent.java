@@ -7,27 +7,36 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
+/**
+ * @author M4TH1EU_#0001
+ */
 @Mod.EventBusSubscriber
-public class Events {
+public class AdvancedStatusEvent {
 
     @SubscribeEvent
     public void onServerJoin(FMLNetworkEvent.ClientConnectedToServerEvent event) {
-        Main.proxy.rpcupdate("En jeu.", null);
+        if (Main.advancedstatus) {
+            Main.proxy.rpcupdate("En jeu.", null);
+        }
     }
 
     @SubscribeEvent
     public void onQuitServer(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
-        Main.proxy.rpcupdate("Dans le menu.", null);
+        if (Main.advancedstatus) {
 
+            Main.proxy.rpcupdate("Dans le menu principal.", null);
+        }
     }
 
     @SubscribeEvent
     public void onGuiOpen(GuiOpenEvent event) {
-        if (event.getGui() instanceof GuiIngameMenu) {
-            Main.proxy.rpcupdate("Dans le menu.", null);
-        }
+        if (Main.advancedstatus) {
+            if (event.getGui() instanceof GuiIngameMenu) {
+                Main.proxy.rpcupdate("Dans le menu pause.", null);
+            }
 
-        System.out.println(event.getGui());
+            System.out.println(event.getGui());
+        }
 
     }
 

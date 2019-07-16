@@ -1,16 +1,18 @@
 [
-{
-  "modid": "richpresence",
-  "name": "Discord Rich Presence Mod",
-  "description": "Un mod pour ajouter Rich Presence",
-  "version": "1.0",
-  "mcversion": "1.12.2",
-  "url": "https://mathieubroillet.ch/",
-  "updateUrl": "",
-  "authorList": ["M4TH1EU_"],
-  "credits": "RPC Lib author(s)",
-  "logoFile": "",
-  "screenshots": [],
-  "dependencies": []
-}
+  {
+    "modid": "richpresence",
+    "name": "Discord Rich Presence Mod",
+    "description": "Un mod pour ajouter un Rich Presence personnalisé",
+    "version": "${version}",
+    "mcversion": "1.12.2",
+    "url": "https://mathieubroillet.ch/",
+    "updateUrl": "",
+    "authorList": [
+      "M4TH1EU_"
+    ],
+    "credits": "RPC Lib author(s)",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
 ]
