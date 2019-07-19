@@ -1,16 +1,19 @@
 package ch.m4th1eu.richpresence;
 
+import ch.m4th1eu.json.JSONArray;
+import ch.m4th1eu.json.JSONObject;
 import ch.m4th1eu.richpresence.events.AdvancedStatusEvent;
 import ch.m4th1eu.richpresence.events.EventPresence;
 import ch.m4th1eu.richpresence.proxy.CommonProxy;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.Logger;
+
+import java.io.*;
 
 /**
  * @author M4TH1EU_#0001
@@ -19,14 +22,14 @@ import org.apache.logging.log4j.Logger;
 public class Main {
     public static final String MODID = "richpresence";
     public static final String NAME = "Discord Rich Presence";
-    public static final String VERSION = "1.1";
+    public static final String VERSION = "1.2";
     @SidedProxy(clientSide = "ch.m4th1eu.richpresence.proxy.ClientProxy", serverSide = "ch.m4th1eu.richpresence.proxy.CommonProxy")
     public static CommonProxy proxy;
 
     /**
      * Variables pour la config
      */
-    public static String applicationId, largeimage, largeimagetext;
+    public static String applicationId, largeimage, largeimagetext, serveurIP;
     public static boolean advancedstatus;
 
 
@@ -35,7 +38,9 @@ public class Main {
 
 
     public Main() {
-        MinecraftForge.EVENT_BUS.register(new AdvancedStatusEvent());
+        if (advancedstatus) {
+            MinecraftForge.EVENT_BUS.register(new AdvancedStatusEvent());
+        }
     }
 
     @EventHandler
@@ -44,24 +49,62 @@ public class Main {
         proxy.preInit(event.getSuggestedConfigurationFile());
 
         //Configuration
-        Configuration cfg = new Configuration(event.getSuggestedConfigurationFile());
-        try {
-            cfg.load();
-            applicationId = cfg.getString("applicationID", "DiscordRichPresence", "ex: 491941559181246465", "Ici mettez le client id de votre application (https://bit.ly/2Lu1CC3).");
-            largeimage = cfg.getString("largeimage", "DiscordRichPresence", "logo", "Ici mettez le nom de votre image (celle dans RichPresence -> Art Assets). (sans le .png)");
-            largeimagetext = cfg.getString("largeimagetext", "DiscordRichPresence", "Mon serveur !", "Ici mettez le texte qui s'affichera quand vous passerez la souris sur l'image.");
 
-            advancedstatus = cfg.getBoolean("advancedstatus", "DiscordRichPresence", true, "Ici laissez \"true\" si vous voulez un status avancé sinon mettez \"false\".");
+        event.getModConfigurationDirectory().mkdir();
+        File config_file = new File(event.getModConfigurationDirectory(), "\\" + Main.MODID + ".json");
+        if (!config_file.exists()) {
+            try {
+                event.getModLog().warn("Impossible de charger la configuration du mod : " + Main.MODID);
+                event.getModLog().warn("Création du fichier de configuration");
+                config_file.createNewFile();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
 
-        } catch (Exception ex) {
-            event.getModLog().error("Failed to load configuration");
-        } finally {
-            if (cfg.hasChanged()) {
-                cfg.save();
+        if (config_file.length() < 10) {
+            try {
+                PrintWriter writer = new PrintWriter(config_file, "UTF-8");
+                writer.println("{\n" +
+                        "  \"application-settings\": [\n" +
+                        "    {\n" +
+                        "      \"applicationID\": \"601875975533232158\",\n" +
+                        "      \"large-image-name\": \"discord_logo\",\n" +
+                        "      \"large-image-text\": \"En train de tester ce mod !\"\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"advanced-status\": true,\n" +
+                        "  \"advanced-status-custom\": [\n" +
+                        "    {\n" +
+                        "      \"onJoinServer\": {\n" +
+                        "        \"message\": \"En jeu.\"\n" +
+                        "      },\n" +
+                        "      \"onQuitServer\": {\n" +
+                        "        \"message\": \"Dans le menu principal.\"\n" +
+                        "      },\n" +
+                        "      \"inPauseMenu\": {\n" +
+                        "        \"message\": \"Dans le menu pause\"\n" +
+                        "      }\n" +
+                        "    }\n" +
+                        "  ]\n" +
+                        "}\n" +
+                        "\n");
+                writer.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
             }
         }
 
 
+        JSONObject config = new JSONObject(Utils.readFileToString(config_file));
+
+        applicationId = config.getJSONObject("application-settings").getString("applicationID");
+        largeimage = config.getJSONObject("application-settings").getString("large-image-name");
+        largeimagetext = config.getJSONObject("application-settings").getString("large-image-text");
+
+        advancedstatus = config.getBoolean("advanced-status");
     }
 
     @EventHandler
@@ -71,7 +114,7 @@ public class Main {
         rpcClient = new EventPresence();
 
         proxy.rpcinit();
-        if (Main.advancedstatus) {
+        if (advancedstatus) {
             proxy.rpcupdate("Dans le menu.", null);
         } else {
             proxy.rpcupdate("", null);
