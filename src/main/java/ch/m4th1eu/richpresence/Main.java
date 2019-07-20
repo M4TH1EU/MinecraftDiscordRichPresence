@@ -1,10 +1,10 @@
 package ch.m4th1eu.richpresence;
 
-import ch.m4th1eu.json.JSONArray;
 import ch.m4th1eu.json.JSONObject;
 import ch.m4th1eu.richpresence.events.AdvancedStatusEvent;
 import ch.m4th1eu.richpresence.events.EventPresence;
 import ch.m4th1eu.richpresence.proxy.CommonProxy;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -29,8 +29,7 @@ public class Main {
     /**
      * Variables pour la config
      */
-    public static String applicationId, largeimage, largeimagetext, serveurIP;
-    public static boolean advancedstatus;
+    public static String applicationId, largeimage, largeimagetext;
 
 
     public static Logger logger;
@@ -38,18 +37,17 @@ public class Main {
 
 
     public Main() {
-        if (advancedstatus) {
-            MinecraftForge.EVENT_BUS.register(new AdvancedStatusEvent());
-        }
+        MinecraftForge.EVENT_BUS.register(new AdvancedStatusEvent());
     }
+
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
         proxy.preInit(event.getSuggestedConfigurationFile());
 
-        //Configuration
 
+        //Configuration
         event.getModConfigurationDirectory().mkdir();
         File config_file = new File(event.getModConfigurationDirectory(), "\\" + Main.MODID + ".json");
         if (!config_file.exists()) {
@@ -66,29 +64,40 @@ public class Main {
             try {
                 PrintWriter writer = new PrintWriter(config_file, "UTF-8");
                 writer.println("{\n" +
-                        "  \"application-settings\": [\n" +
-                        "    {\n" +
-                        "      \"applicationID\": \"601875975533232158\",\n" +
-                        "      \"large-image-name\": \"discord_logo\",\n" +
-                        "      \"large-image-text\": \"En train de tester ce mod !\"\n" +
+                        "  \"_comment\": \"Variables disponibles :\",\n" +
+                        "  \"_comment2\": \"%player-name% - Nom du joueur.\",\n" +
+                        "  \"_comment3\": \"%server-connected-player% - Nombre de joueur connecté au serveur.\",\n" +
+                        "  \"_comment4\": \"%server-max-slot% - Nombre de slots du serveur\",\n" +
+                        "  \"server-ip\": \"mc.hypixel.net\",\n" +
+                        "  \"server-port\": \"25565\",\n" +
+                        "  \"application-settings\": {\n" +
+                        "    \"applicationID\": \"601875975533232158\",\n" +
+                        "    \"large-image-name\": \"discord_logo\",\n" +
+                        "    \"large-image-text\": \"En train de tester ce mod !\"\n" +
+                        "  },\n" +
+                        "  \"advanced-status-custom\": {\n" +
+                        "    \"onJoinServer\": {\n" +
+                        "      \"enable\": true,\n" +
+                        "      \"message\": \"En jeu.\"\n" +
+                        "    },\n" +
+                        "    \"onQuitServer\": {\n" +
+                        "      \"enable\": true,\n" +
+                        "      \"message\": \"Dans le menu principal.\"\n" +
+                        "    },\n" +
+                        "    \"inPauseMenu\": {\n" +
+                        "      \"enable\": true,\n" +
+                        "      \"message\": \"Dans le menu pause.\"\n" +
+                        "    },\n" +
+                        "    \"inMainMenu\": {\n" +
+                        "      \"enable\": true,\n" +
+                        "      \"message\": \"Dans le menu principal.\"\n" +
+                        "    },\n" +
+                        "    \"inInventory\": {\n" +
+                        "      \"enable\": false,\n" +
+                        "      \"message\": \"Dans l'inventaire.\"\n" +
                         "    }\n" +
-                        "  ],\n" +
-                        "  \"advanced-status\": true,\n" +
-                        "  \"advanced-status-custom\": [\n" +
-                        "    {\n" +
-                        "      \"onJoinServer\": {\n" +
-                        "        \"message\": \"En jeu.\"\n" +
-                        "      },\n" +
-                        "      \"onQuitServer\": {\n" +
-                        "        \"message\": \"Dans le menu principal.\"\n" +
-                        "      },\n" +
-                        "      \"inPauseMenu\": {\n" +
-                        "        \"message\": \"Dans le menu pause\"\n" +
-                        "      }\n" +
-                        "    }\n" +
-                        "  ]\n" +
-                        "}\n" +
-                        "\n");
+                        "  }\n" +
+                        "}");
                 writer.close();
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -102,23 +111,24 @@ public class Main {
 
         applicationId = config.getJSONObject("application-settings").getString("applicationID");
         largeimage = config.getJSONObject("application-settings").getString("large-image-name");
-        largeimagetext = config.getJSONObject("application-settings").getString("large-image-text");
+        largeimagetext = Utils.replaceArgsString(config.getJSONObject("application-settings").getString("large-image-text"));
 
-        advancedstatus = config.getBoolean("advanced-status");
+
     }
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
+        JSONObject config = new JSONObject(Utils.readFileToString(new File(Minecraft.getMinecraft().mcDataDir, "\\config\\" + Main.MODID + ".json")));
 
         proxy.init();
         rpcClient = new EventPresence();
 
-        proxy.rpcinit();
-        if (advancedstatus) {
-            proxy.rpcupdate("Dans le menu.", null);
-        } else {
-            proxy.rpcupdate("", null);
 
+        proxy.rpcinit();
+        if (config.getJSONObject("advanced-status-custom").getJSONObject("inMainMenu").getBoolean("enable")) {
+            proxy.rpcupdate(config.getJSONObject("advanced-status-custom").getJSONObject("inMainMenu").getString("message"), null, false);
+        } else {
+            proxy.rpcupdate("", null, false);
         }
 
     }

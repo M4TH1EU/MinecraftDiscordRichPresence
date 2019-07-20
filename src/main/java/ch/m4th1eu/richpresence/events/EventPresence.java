@@ -12,17 +12,13 @@ public class EventPresence {
 
     private static Thread callbackRunner;
 
-    public synchronized static final void init() {
+    public synchronized static void init() {
         DiscordEventHandlers handlers = new DiscordEventHandlers();
         DiscordRPC.discordInitialize(Main.applicationId, handlers, true, null);
         if (EventPresence.callbackRunner == null) {
             (EventPresence.callbackRunner = new Thread(() -> {
                 while (!Thread.currentThread().isInterrupted()) {
                     DiscordRPC.discordRunCallbacks();
-                    try {
-                        Thread.sleep(100L);
-                    } catch (InterruptedException ex) {
-                    }
                 }
                 return;
             }, "RPC-Callback-Handler")).start();
@@ -30,14 +26,16 @@ public class EventPresence {
         Main.logger.info("EventPresence has been started.");
     }
 
-    public static final void updatePresence(String details, String action) {
+    public synchronized static void updatePresence(String details, String action, Boolean changeTime) {
         DiscordRichPresence presence = new DiscordRichPresence();
         presence.largeImageKey = Main.largeimage;
         presence.largeImageText = Main.largeimagetext;
         if (details != null) {
             presence.details = details;
 
-            presence.startTimestamp = System.currentTimeMillis() / 1000L;
+            if (changeTime) {
+                presence.startTimestamp = System.currentTimeMillis() / 1000L;
+            }
         } else if (action != null) {
             presence.state = action;
         }

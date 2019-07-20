@@ -19,7 +19,7 @@ public class CommonProxy {
     public void rpcinit() {
     }
 
-    public void rpcupdate(String details, String action) {
+    public void rpcupdate(String details, String action, Boolean changeTime) {
     }
 
 }

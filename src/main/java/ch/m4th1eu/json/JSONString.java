@@ -1,4 +1,5 @@
 package ch.m4th1eu.json;
+
 /**
  * The <code>JSONString</code> interface allows a <code>toJSONString()</code>
  * method so that a class can change the behavior of
@@ -14,5 +15,5 @@ public interface JSONString {
      *
      * @return A strictly syntactically correct JSON text.
      */
-    public String toJSONString();
+    String toJSONString();
 }

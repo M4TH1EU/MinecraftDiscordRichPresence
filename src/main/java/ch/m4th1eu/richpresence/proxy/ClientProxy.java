@@ -28,7 +28,7 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public void rpcupdate(String details, String action) {
-        EventPresence.updatePresence(details, action);
+    public void rpcupdate(String details, String action, Boolean changeTime) {
+        EventPresence.updatePresence(details, action, changeTime);
     }
 }

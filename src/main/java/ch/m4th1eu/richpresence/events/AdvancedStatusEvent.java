@@ -5,7 +5,9 @@ import ch.m4th1eu.richpresence.Main;
 import ch.m4th1eu.richpresence.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiIngameMenu;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.Mod;
@@ -24,28 +26,52 @@ public class AdvancedStatusEvent {
     JSONObject config = new JSONObject(Utils.readFileToString(config_file));
 
     @SubscribeEvent
-    public void onServerJoin(FMLNetworkEvent.ClientConnectedToServerEvent event) {
-        if (Main.advancedstatus) {
-            Main.proxy.rpcupdate(config.getJSONArray("advanced-status-custom").getJSONObject(0).getString("message"), null);
+    public void onJoinServer(FMLNetworkEvent.ClientConnectedToServerEvent event) {
+        JSONObject onJoinServer = config.getJSONObject("advanced-status-custom").getJSONObject("onJoinServer");
+
+        if (onJoinServer.getBoolean("enable")) {
+            Utils.updateStatus(1);
         }
     }
 
     @SubscribeEvent
     public void onQuitServer(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
-        if (Main.advancedstatus) {
+        JSONObject onQuitServer = config.getJSONObject("advanced-status-custom").getJSONObject("onQuitServer");
 
-            Main.proxy.rpcupdate(config.getJSONArray("advanced-status-custom").getJSONObject(1).getString("message"), null);
+        if (onQuitServer.getBoolean("enable")) {
+            Utils.updateStatus(1);
         }
     }
 
     @SubscribeEvent
     public void onGuiOpen(GuiOpenEvent event) {
-        if (Main.advancedstatus) {
+
+        JSONObject inPauseMenu = config.getJSONObject("advanced-status-custom").getJSONObject("inPauseMenu");
+        JSONObject inMainMenu = config.getJSONObject("advanced-status-custom").getJSONObject("inMainMenu");
+        JSONObject inInventory = config.getJSONObject("advanced-status-custom").getJSONObject("inInventory");
+
+        if (inPauseMenu.getBoolean("enable")) {
             if (event.getGui() instanceof GuiIngameMenu) {
-                Main.proxy.rpcupdate(config.getJSONArray("advanced-status-custom").getJSONObject(2).getString("message"), null);
+                Utils.updateStatus(3);
+            }
+        }
+
+        if (inMainMenu.getBoolean("enable")) {
+            if (event.getGui() instanceof GuiMainMenu) {
+                Utils.updateStatus(4);
+            }
+        }
+
+        if (inInventory.getBoolean("enable")) {
+            if (event.getGui() instanceof GuiInventory) {
+                Utils.updateStatus(5);
+            }
+        }
+
+        if (event.getGui() == null) {
+            if (config.getJSONObject("advanced-status-custom").getJSONObject("onJoinServer").getBoolean("enable")) {
+                Utils.updateStatus(6);
             }
         }
     }
-
-
 }
