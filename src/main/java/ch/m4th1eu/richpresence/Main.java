@@ -4,7 +4,6 @@ import ch.m4th1eu.json.JSONObject;
 import ch.m4th1eu.richpresence.events.AdvancedStatusEvent;
 import ch.m4th1eu.richpresence.events.EventPresence;
 import ch.m4th1eu.richpresence.proxy.CommonProxy;
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -17,6 +16,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 
 /**
  * @author M4TH1EU_#0001
@@ -25,7 +25,7 @@ import java.io.UnsupportedEncodingException;
 public class Main {
     public static final String MODID = "richpresence";
     public static final String NAME = "Discord Rich Presence";
-    public static final String VERSION = "1.2";
+    public static final String VERSION = "1.3";
 
     @Mod.Instance(Main.MODID)
     public static Main instance;
@@ -49,7 +49,13 @@ public class Main {
 
         //Configuration
         event.getModConfigurationDirectory().mkdir();
-        File config_file = new File(event.getModConfigurationDirectory(), "\\" + Main.MODID + ".json");
+
+        File config_file = null;
+        try {
+            config_file = new File(getClass().getResource("/config/richpresence.json").toURI());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
 
         if (!config_file.exists() || config_file.length() < 10) {
             try {
@@ -106,15 +112,19 @@ public class Main {
         MinecraftForge.EVENT_BUS.register(instance);
         MinecraftForge.EVENT_BUS.register(new AdvancedStatusEvent());
 
-        JSONObject config = new JSONObject(Utils.readFileToString(new File(Minecraft.getMinecraft().mcDataDir, "\\config\\" + Main.MODID + ".json")));
+        JSONObject config = null;
+        try {
+            config = new JSONObject(Utils.readFileToString(new File(getClass().getResource("/config/richpresence.json").toURI())));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
 
         applicationId = config.getJSONObject("application-settings").getString("applicationID");
         largeimage = config.getJSONObject("application-settings").getString("large-image-name");
-        largeimagetext = Utils.replaceArgsString(config.getJSONObject("application-settings").getString("large-image-text"));
+        largeimagetext = Utils.instance.replaceArgsString(config.getJSONObject("application-settings").getString("large-image-text"));
 
         proxy.init();
         rpcClient = new EventPresence();
-
 
         proxy.rpcinit();
 

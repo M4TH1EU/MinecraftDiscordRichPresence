@@ -15,7 +15,7 @@ public class EventPresence {
 
     public synchronized static void init() {
         DiscordEventHandlers handlers = new DiscordEventHandlers();
-        DiscordRPC.discordInitialize(Main.applicationId, handlers, true, null);
+        DiscordRPC.discordInitialize(Main.applicationId, handlers, true);
         if (EventPresence.callbackRunner == null) {
             (EventPresence.callbackRunner = new Thread(() -> {
                 while (!Thread.currentThread().isInterrupted()) {
@@ -27,7 +27,7 @@ public class EventPresence {
         Main.logger.info("EventPresence has been started.");
     }
 
-    public synchronized static void updatePresence(String details, String action, Boolean changeTime) {
+    public static void updatePresence(String details, String action, Boolean changeTime) {
         DiscordRichPresence presence = new DiscordRichPresence();
         presence.largeImageKey = Main.largeimage;
         presence.largeImageText = Main.largeimagetext;
