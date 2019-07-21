@@ -10,6 +10,7 @@ import net.arikia.dev.drpc.DiscordRichPresence;
  */
 public class EventPresence {
 
+    public static long oldTime;
     private static Thread callbackRunner;
 
     public synchronized static void init() {
@@ -35,6 +36,11 @@ public class EventPresence {
 
             if (changeTime) {
                 presence.startTimestamp = System.currentTimeMillis() / 1000L;
+                oldTime = presence.startTimestamp;
+            } else {
+                System.out.println(presence.startTimestamp);
+                System.out.println(oldTime);
+                presence.startTimestamp = oldTime;
             }
         } else if (action != null) {
             presence.state = action;

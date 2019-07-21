@@ -13,7 +13,10 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 
 /**
  * @author M4TH1EU_#0001
@@ -23,6 +26,10 @@ public class Main {
     public static final String MODID = "richpresence";
     public static final String NAME = "Discord Rich Presence";
     public static final String VERSION = "1.2";
+
+    @Mod.Instance(Main.MODID)
+    public static Main instance;
+
     @SidedProxy(clientSide = "ch.m4th1eu.richpresence.proxy.ClientProxy", serverSide = "ch.m4th1eu.richpresence.proxy.CommonProxy")
     public static CommonProxy proxy;
 
@@ -35,33 +42,20 @@ public class Main {
     public static Logger logger;
     public EventPresence rpcClient;
 
-
-    public Main() {
-        MinecraftForge.EVENT_BUS.register(new AdvancedStatusEvent());
-    }
-
-
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
         proxy.preInit(event.getSuggestedConfigurationFile());
 
-
         //Configuration
         event.getModConfigurationDirectory().mkdir();
         File config_file = new File(event.getModConfigurationDirectory(), "\\" + Main.MODID + ".json");
-        if (!config_file.exists()) {
+
+        if (!config_file.exists() || config_file.length() < 10) {
             try {
                 event.getModLog().warn("Impossible de charger la configuration du mod : " + Main.MODID);
                 event.getModLog().warn("Création du fichier de configuration");
-                config_file.createNewFile();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
 
-        if (config_file.length() < 10) {
-            try {
                 PrintWriter writer = new PrintWriter(config_file, "UTF-8");
                 writer.println("{\n" +
                         "  \"_comment\": \"Variables disponibles :\",\n" +
@@ -105,28 +99,27 @@ public class Main {
                 e.printStackTrace();
             }
         }
-
-
-        JSONObject config = new JSONObject(Utils.readFileToString(config_file));
-
-        applicationId = config.getJSONObject("application-settings").getString("applicationID");
-        largeimage = config.getJSONObject("application-settings").getString("large-image-name");
-        largeimagetext = Utils.replaceArgsString(config.getJSONObject("application-settings").getString("large-image-text"));
-
-
     }
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
+        MinecraftForge.EVENT_BUS.register(instance);
+        MinecraftForge.EVENT_BUS.register(new AdvancedStatusEvent());
+
         JSONObject config = new JSONObject(Utils.readFileToString(new File(Minecraft.getMinecraft().mcDataDir, "\\config\\" + Main.MODID + ".json")));
+
+        applicationId = config.getJSONObject("application-settings").getString("applicationID");
+        largeimage = config.getJSONObject("application-settings").getString("large-image-name");
+        largeimagetext = Utils.replaceArgsString(config.getJSONObject("application-settings").getString("large-image-text"));
 
         proxy.init();
         rpcClient = new EventPresence();
 
 
         proxy.rpcinit();
+
         if (config.getJSONObject("advanced-status-custom").getJSONObject("inMainMenu").getBoolean("enable")) {
-            proxy.rpcupdate(config.getJSONObject("advanced-status-custom").getJSONObject("inMainMenu").getString("message"), null, false);
+            proxy.rpcupdate(config.getJSONObject("advanced-status-custom").getJSONObject("inMainMenu").getString("message"), null, true);
         } else {
             proxy.rpcupdate("", null, false);
         }

@@ -2,7 +2,6 @@ package ch.m4th1eu.richpresence;
 
 import ch.m4th1eu.json.JSONObject;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.INetHandler;
 
 import java.io.*;
 import java.net.URL;
@@ -14,12 +13,13 @@ public class Utils {
     /**
      * @author Nathanaël#4314
      */
-    public static String readFileToString(final File file) {
+    public static String readFileToString(File file) {
         try {
-            final BufferedReader reader = new BufferedReader(new FileReader(file));
-            final StringBuilder stringBuilder = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            StringBuilder stringBuilder = new StringBuilder();
             String line;
-            final String ls = System.getProperty("line.separator");
+
+            String ls = System.getProperty("line.separator");
             while ((line = reader.readLine()) != null) {
                 stringBuilder.append(line);
                 stringBuilder.append(ls);
