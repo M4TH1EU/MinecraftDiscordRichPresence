@@ -25,7 +25,7 @@ import java.io.InputStreamReader;
 public class Main {
     public static final String MODID = "richpresence";
     public static final String NAME = "Discord Rich Presence";
-    public static final String VERSION = "1.4";
+    public static final String VERSION = "1.5";
 
     @Mod.Instance(Main.MODID)
     public static Main instance;
