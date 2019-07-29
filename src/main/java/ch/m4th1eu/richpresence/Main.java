@@ -10,13 +10,13 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * @author M4TH1EU_#0001
@@ -25,7 +25,7 @@ import java.net.URISyntaxException;
 public class Main {
     public static final String MODID = "richpresence";
     public static final String NAME = "Discord Rich Presence";
-    public static final String VERSION = "1.3";
+    public static final String VERSION = "1.4";
 
     @Mod.Instance(Main.MODID)
     public static Main instance;
@@ -37,6 +37,8 @@ public class Main {
      * Variables pour la config
      */
     public static String applicationId, largeimage, largeimagetext;
+    public static String config_file_text = "";
+    public static JSONObject config_object;
 
 
     public static Logger logger;
@@ -50,60 +52,21 @@ public class Main {
         //Configuration
         event.getModConfigurationDirectory().mkdir();
 
-        File config_file = null;
+
+        InputStream in = getClass().getResourceAsStream("/config/richpresence.json");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+
         try {
-            config_file = new File(getClass().getResource("/config/richpresence.json").toURI());
-        } catch (URISyntaxException e) {
+            config_file_text = IOUtils.toString(reader);
+            config_object = new JSONObject(config_file_text);
+            reader.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
-        if (!config_file.exists() || config_file.length() < 10) {
-            try {
-                event.getModLog().warn("Impossible de charger la configuration du mod : " + Main.MODID);
-                event.getModLog().warn("Création du fichier de configuration");
+        if (config_file_text != null || config_file_text.length() < 10) {
+            event.getModLog().warn("Impossible de charger la configuration du mod : " + Main.MODID);
 
-                PrintWriter writer = new PrintWriter(config_file, "UTF-8");
-                writer.println("{\n" +
-                        "  \"_comment\": \"Variables disponibles :\",\n" +
-                        "  \"_comment2\": \"%player-name% - Nom du joueur.\",\n" +
-                        "  \"_comment3\": \"%server-connected-player% - Nombre de joueur connecté au serveur.\",\n" +
-                        "  \"_comment4\": \"%server-max-slot% - Nombre de slots du serveur\",\n" +
-                        "  \"server-ip\": \"mc.hypixel.net\",\n" +
-                        "  \"server-port\": \"25565\",\n" +
-                        "  \"application-settings\": {\n" +
-                        "    \"applicationID\": \"601875975533232158\",\n" +
-                        "    \"large-image-name\": \"discord_logo\",\n" +
-                        "    \"large-image-text\": \"En train de tester ce mod !\"\n" +
-                        "  },\n" +
-                        "  \"advanced-status-custom\": {\n" +
-                        "    \"onJoinServer\": {\n" +
-                        "      \"enable\": true,\n" +
-                        "      \"message\": \"En jeu.\"\n" +
-                        "    },\n" +
-                        "    \"onQuitServer\": {\n" +
-                        "      \"enable\": true,\n" +
-                        "      \"message\": \"Dans le menu principal.\"\n" +
-                        "    },\n" +
-                        "    \"inPauseMenu\": {\n" +
-                        "      \"enable\": true,\n" +
-                        "      \"message\": \"Dans le menu pause.\"\n" +
-                        "    },\n" +
-                        "    \"inMainMenu\": {\n" +
-                        "      \"enable\": true,\n" +
-                        "      \"message\": \"Dans le menu principal.\"\n" +
-                        "    },\n" +
-                        "    \"inInventory\": {\n" +
-                        "      \"enable\": false,\n" +
-                        "      \"message\": \"Dans l'inventaire.\"\n" +
-                        "    }\n" +
-                        "  }\n" +
-                        "}");
-                writer.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -112,24 +75,18 @@ public class Main {
         MinecraftForge.EVENT_BUS.register(instance);
         MinecraftForge.EVENT_BUS.register(new AdvancedStatusEvent());
 
-        JSONObject config = null;
-        try {
-            config = new JSONObject(Utils.readFileToString(new File(getClass().getResource("/config/richpresence.json").toURI())));
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
 
-        applicationId = config.getJSONObject("application-settings").getString("applicationID");
-        largeimage = config.getJSONObject("application-settings").getString("large-image-name");
-        largeimagetext = Utils.instance.replaceArgsString(config.getJSONObject("application-settings").getString("large-image-text"));
+        applicationId = config_object.getJSONObject("application-settings").getString("applicationID");
+        largeimage = config_object.getJSONObject("application-settings").getString("large-image-name");
+        largeimagetext = Utils.instance.replaceArgsString(config_object.getJSONObject("application-settings").getString("large-image-text"));
 
         proxy.init();
         rpcClient = new EventPresence();
 
         proxy.rpcinit();
 
-        if (config.getJSONObject("advanced-status-custom").getJSONObject("inMainMenu").getBoolean("enable")) {
-            proxy.rpcupdate(config.getJSONObject("advanced-status-custom").getJSONObject("inMainMenu").getString("message"), null, true);
+        if (config_object.getJSONObject("advanced-status-custom").getJSONObject("inMainMenu").getBoolean("enable")) {
+            proxy.rpcupdate(config_object.getJSONObject("advanced-status-custom").getJSONObject("inMainMenu").getString("message"), null, true);
         } else {
             proxy.rpcupdate("", null, false);
         }

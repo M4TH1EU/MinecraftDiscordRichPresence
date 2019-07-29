@@ -1,2 +1,35 @@
 {
+  "_comment": "Variables disponibles :",
+  "_comment2": "%player-name% - Nom du joueur.",
+  "_comment3": "%server-connected-player% - Nombre de joueur connecté au serveur.",
+  "_comment4": "%server-max-slot% - Nombre de slots du serveur",
+  "server-ip": "mc.hypixel.net",
+  "server-port": "25565",
+  "application-settings": {
+    "applicationID": "601875975533232158",
+    "large-image-name": "discord_logo",
+    "large-image-text": "En train de tester ce mod !"
+  },
+  "advanced-status-custom": {
+    "onJoinServer": {
+      "enable": true,
+      "message": "En jeu."
+    },
+    "onQuitServer": {
+      "enable": true,
+      "message": "Dans le menu principal."
+    },
+    "inPauseMenu": {
+      "enable": true,
+      "message": "Dans le menu pause."
+    },
+    "inMainMenu": {
+      "enable": true,
+      "message": "Dans le menu principal."
+    },
+    "inInventory": {
+      "enable": false,
+      "message": "Dans l'inventaire."
+    }
+  }
 }

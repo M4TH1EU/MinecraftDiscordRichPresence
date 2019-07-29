@@ -3,8 +3,10 @@ package ch.m4th1eu.richpresence;
 import ch.m4th1eu.json.JSONObject;
 import net.minecraft.client.Minecraft;
 
-import java.io.*;
-import java.net.URISyntaxException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
@@ -12,40 +14,6 @@ import java.nio.charset.Charset;
 public class Utils {
 
     public static final Utils instance = new Utils();
-
-    private JSONObject config;
-
-    {
-        try {
-            config = new JSONObject(Utils.readFileToString(new File(getClass().getResource("/config/richpresence.json").toURI())));
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    /**
-     * @author Nathanaël#4314
-     */
-    public static String readFileToString(File file) {
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            StringBuilder stringBuilder = new StringBuilder();
-            String line;
-
-            String ls = System.getProperty("line.separator");
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-                stringBuilder.append(ls);
-            }
-            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-            reader.close();
-            return stringBuilder.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "ERROR";
-        }
-    }
 
     public static String readTextFromURL(String url) throws IOException {
         URL urlObject;
@@ -72,16 +40,8 @@ public class Utils {
      * @author M4TH1EU_
      */
     public String replaceArgsString(String variable) {
-        File config_file = null;
-        try {
-            config_file = new File(getClass().getResource("/config/richpresence.json").toURI());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        JSONObject config = new JSONObject(Utils.readFileToString(config_file));
-
-        String serverip = config.getString("server-ip");
-        String serverport = config.getString("server-port");
+        String serverip = Main.config_object.getString("server-ip");
+        String serverport = Main.config_object.getString("server-port");
 
         try {
             variable = variable.replaceAll("%player-name%", Minecraft.getMinecraft().getSession().getUsername());
@@ -96,15 +56,15 @@ public class Utils {
     public void updateStatus(int id) {
         Thread t = new Thread(() -> {
 
-            JSONObject onQuitServer = config.getJSONObject("advanced-status-custom").getJSONObject("onQuitServer");
-            JSONObject onJoinServer = config.getJSONObject("advanced-status-custom").getJSONObject("onJoinServer");
-            JSONObject inPauseMenu = config.getJSONObject("advanced-status-custom").getJSONObject("inPauseMenu");
-            JSONObject inMainMenu = config.getJSONObject("advanced-status-custom").getJSONObject("inMainMenu");
-            JSONObject inInventory = config.getJSONObject("advanced-status-custom").getJSONObject("inInventory");
+            JSONObject onQuitServer = Main.config_object.getJSONObject("advanced-status-custom").getJSONObject("onQuitServer");
+            JSONObject onJoinServer = Main.config_object.getJSONObject("advanced-status-custom").getJSONObject("onJoinServer");
+            JSONObject inPauseMenu = Main.config_object.getJSONObject("advanced-status-custom").getJSONObject("inPauseMenu");
+            JSONObject inMainMenu = Main.config_object.getJSONObject("advanced-status-custom").getJSONObject("inMainMenu");
+            JSONObject inInventory = Main.config_object.getJSONObject("advanced-status-custom").getJSONObject("inInventory");
 
             switch (id) {
                 case 0:
-                    Main.proxy.rpcupdate(replaceArgsString(config.getJSONObject("advanced-status-custom").getJSONObject("inMainMenu").getString("message")), null, false);
+                    Main.proxy.rpcupdate(replaceArgsString(Main.config_object.getJSONObject("advanced-status-custom").getJSONObject("inMainMenu").getString("message")), null, false);
                     break;
                 case 1:
                     Main.proxy.rpcupdate(replaceArgsString(onJoinServer.getString("message")), null, false);
@@ -122,7 +82,7 @@ public class Utils {
                     Main.proxy.rpcupdate(replaceArgsString(inInventory.getString("message")), null, false);
                     break;
                 case 6:
-                    Main.proxy.rpcupdate(replaceArgsString(config.getJSONObject("advanced-status-custom").getJSONObject("onJoinServer").getString("message")), null, false);
+                    Main.proxy.rpcupdate(replaceArgsString(Main.config_object.getJSONObject("advanced-status-custom").getJSONObject("onJoinServer").getString("message")), null, false);
                     break;
                 default:
                     break;
