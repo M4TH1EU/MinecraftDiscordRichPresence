@@ -45,8 +45,8 @@ public class Utils {
 
         try {
             variable = variable.replaceAll("%player-name%", Minecraft.getMinecraft().getSession().getUsername());
-            variable = variable.replaceAll("%server-connected-player%", readTextFromURL("https://minecraft-api.com/api/ping/playeronline.php?ip=" + serverip + "&port=" + serverport));
-            variable = variable.replaceAll("%server-max-slot%", readTextFromURL("https://minecraft-api.com/api/ping/maxplayer.php?ip=" + serverip + "&port=" + serverport));
+            variable = variable.replaceAll("%server-connected-player%", readTextFromURL("https://api.serveurs-minecraft.com/api.php?Joueurs_En_Ligne_Ping&ip=" + serverip + "&port=" + serverport));
+            variable = variable.replaceAll("%server-max-slot%", readTextFromURL("https://api.serveurs-minecraft.com/api.php?Joueurs_Maximum_Ping&ip=" + serverip + "&port=" + serverport));
         } catch (Exception e) {
         }
 
