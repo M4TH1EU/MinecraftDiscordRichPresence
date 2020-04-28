@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class Utils {
 
@@ -27,7 +27,7 @@ public class Utils {
                 "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)");
         uc.getInputStream();
         InputStream is = uc.getInputStream();
-        BufferedReader in = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+        BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
 
         int ch;
         while ((ch = in.read()) != -1) {
@@ -47,7 +47,7 @@ public class Utils {
             variable = variable.replaceAll("%player-name%", Minecraft.getMinecraft().getSession().getUsername());
             variable = variable.replaceAll("%server-connected-player%", readTextFromURL("https://api.serveurs-minecraft.com/api.php?Joueurs_En_Ligne_Ping&ip=" + serverip + "&port=" + serverport));
             variable = variable.replaceAll("%server-max-slot%", readTextFromURL("https://api.serveurs-minecraft.com/api.php?Joueurs_Maximum_Ping&ip=" + serverip + "&port=" + serverport));
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
 
         return variable;
@@ -63,26 +63,20 @@ public class Utils {
             JSONObject inInventory = Main.config_object.getJSONObject("advanced-status-custom").getJSONObject("inInventory");
 
             switch (id) {
-                case 0:
-                    Main.proxy.rpcupdate(replaceArgsString(Main.config_object.getJSONObject("advanced-status-custom").getJSONObject("inMainMenu").getString("message")), null, false);
-                    break;
                 case 1:
-                    Main.proxy.rpcupdate(replaceArgsString(onJoinServer.getString("message")), null, false);
+                    Main.proxy.rpcupdate(replaceArgsString(onJoinServer.getString("message")), getState(onJoinServer), false);
                     break;
                 case 2:
-                    Main.proxy.rpcupdate(replaceArgsString(onQuitServer.getString("message")), null, false);
+                    Main.proxy.rpcupdate(replaceArgsString(onQuitServer.getString("message")), getState(onQuitServer), false);
                     break;
                 case 3:
-                    Main.proxy.rpcupdate(replaceArgsString(inPauseMenu.getString("message")), null, false);
+                    Main.proxy.rpcupdate(replaceArgsString(inPauseMenu.getString("message")), getState(inPauseMenu), false);
                     break;
                 case 4:
-                    Main.proxy.rpcupdate(replaceArgsString(inMainMenu.getString("message")), null, false);
+                    Main.proxy.rpcupdate(replaceArgsString(inMainMenu.getString("message")), getState(inMainMenu), false);
                     break;
                 case 5:
-                    Main.proxy.rpcupdate(replaceArgsString(inInventory.getString("message")), null, false);
-                    break;
-                case 6:
-                    Main.proxy.rpcupdate(replaceArgsString(Main.config_object.getJSONObject("advanced-status-custom").getJSONObject("onJoinServer").getString("message")), null, false);
+                    Main.proxy.rpcupdate(replaceArgsString(inInventory.getString("message")), getState(inInventory), false);
                     break;
                 default:
                     break;
@@ -90,8 +84,16 @@ public class Utils {
         });
 
         t.start();
+    }
 
+    private String getState(JSONObject jsonObject) {
+        String state = replaceArgsString(Main.config_object.getString("state"));
 
+        if (jsonObject.getBoolean("showState")) {
+            return state;
+        }
+
+        return null;
     }
 }
 

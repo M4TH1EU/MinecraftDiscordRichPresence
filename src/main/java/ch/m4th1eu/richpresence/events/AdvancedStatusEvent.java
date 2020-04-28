@@ -32,7 +32,7 @@ public class AdvancedStatusEvent {
         JSONObject onQuitServer = Main.config_object.getJSONObject("advanced-status-custom").getJSONObject("onQuitServer");
 
         if (onQuitServer.getBoolean("enable")) {
-            Utils.instance.updateStatus(1);
+            Utils.instance.updateStatus(2);
         }
     }
 
@@ -63,7 +63,7 @@ public class AdvancedStatusEvent {
 
         if (event.getGui() == null) {
             if (Main.config_object.getJSONObject("advanced-status-custom").getJSONObject("onJoinServer").getBoolean("enable")) {
-                Utils.instance.updateStatus(6);
+                Utils.instance.updateStatus(1);
             }
         }
     }

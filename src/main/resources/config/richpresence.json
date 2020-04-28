@@ -5,6 +5,7 @@
   "_comment4": "%server-max-slot% - Nombre de slots du serveur",
   "server-ip": "mc.hypixel.net",
   "server-port": "25565",
+  "state": "%server-connected-player%/%server-max-slot% joueurs connectés",
   "application-settings": {
     "applicationID": "601875975533232158",
     "large-image-name": "discord_logo",
@@ -13,22 +14,27 @@
   "advanced-status-custom": {
     "onJoinServer": {
       "enable": true,
+      "showState": true,
       "message": "En jeu."
     },
     "onQuitServer": {
       "enable": true,
+      "showState": false,
       "message": "Dans le menu principal."
     },
     "inPauseMenu": {
       "enable": true,
+      "showState": true,
       "message": "Dans le menu pause."
     },
     "inMainMenu": {
       "enable": true,
+      "showState": false,
       "message": "Dans le menu principal."
     },
     "inInventory": {
       "enable": false,
+      "showState": true,
       "message": "Dans l'inventaire."
     }
   }

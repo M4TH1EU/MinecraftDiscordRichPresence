@@ -38,11 +38,11 @@ public class EventPresence {
                 presence.startTimestamp = System.currentTimeMillis() / 1000L;
                 oldTime = presence.startTimestamp;
             } else {
-                System.out.println(presence.startTimestamp);
-                System.out.println(oldTime);
                 presence.startTimestamp = oldTime;
             }
-        } else if (action != null) {
+        }
+
+        if (action != null) {
             presence.state = action;
         }
         DiscordRPC.discordUpdatePresence(presence);
