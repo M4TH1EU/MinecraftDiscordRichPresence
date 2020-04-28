@@ -9,6 +9,7 @@ import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
 /**
@@ -17,6 +18,12 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 @Mod.EventBusSubscriber
 public class AdvancedStatusEvent {
 
+    @SubscribeEvent
+    public void onTickEvent(TickEvent.WorldTickEvent event) {
+        if (event.world.getTotalWorldTime() % 1024 == 0) {
+            Utils.instance.updateStatus(Utils.status);
+        }
+    }
 
     @SubscribeEvent
     public void onJoinServer(FMLNetworkEvent.ClientConnectedToServerEvent event) {

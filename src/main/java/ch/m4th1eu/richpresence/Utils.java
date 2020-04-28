@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 public class Utils {
 
     public static final Utils instance = new Utils();
+    public static int status = 0;
 
     public static String readTextFromURL(String url) throws IOException {
         URL urlObject;
@@ -45,8 +46,11 @@ public class Utils {
 
         try {
             variable = variable.replaceAll("%player-name%", Minecraft.getMinecraft().getSession().getUsername());
-            variable = variable.replaceAll("%server-connected-player%", readTextFromURL("https://api.serveurs-minecraft.com/api.php?Joueurs_En_Ligne_Ping&ip=" + serverip + "&port=" + serverport));
+            variable = variable.replaceAll("%server-connected-player%",
+                    readTextFromURL("https://api.serveurs-minecraft.com/api.php?Joueurs_En_Ligne_Ping&ip=" + serverip + "&port=" + serverport));
             variable = variable.replaceAll("%server-max-slot%", readTextFromURL("https://api.serveurs-minecraft.com/api.php?Joueurs_Maximum_Ping&ip=" + serverip + "&port=" + serverport));
+
+            System.out.println(readTextFromURL("https://api.serveurs-minecraft.com/api.php?Joueurs_En_Ligne_Ping&ip=" + serverip + "&port=" + serverport));
         } catch (Exception ignored) {
         }
 
@@ -55,6 +59,8 @@ public class Utils {
 
     public void updateStatus(int id) {
         Thread t = new Thread(() -> {
+
+            status = id;
 
             JSONObject onQuitServer = Main.config_object.getJSONObject("advanced-status-custom").getJSONObject("onQuitServer");
             JSONObject onJoinServer = Main.config_object.getJSONObject("advanced-status-custom").getJSONObject("onJoinServer");
@@ -88,6 +94,7 @@ public class Utils {
 
     private String getState(JSONObject jsonObject) {
         String state = replaceArgsString(Main.config_object.getString("state"));
+        System.out.println(state);
 
         if (jsonObject.getBoolean("showState")) {
             return state;
